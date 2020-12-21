@@ -41,9 +41,9 @@ test = Game(window)
 #test.divide()
 test.draw_cells()
 pygame.display.set_caption('Chess')
-s = pygame.image.load('C:\\Users\\Manu\\Desktop\\Pieces\\bishop.png')
+#s = pygame.image.load('C:\\Users\\Manu\\Desktop\\Pieces\\bishop.png')
 
-window.blit(s, (168, 8))
+#window.blit(s, (168, 8))
 pygame.display.flip()
 
 running = True
