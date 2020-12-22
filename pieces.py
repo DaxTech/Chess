@@ -1,7 +1,6 @@
 #! python3
 import pygame
 
-
 def print_board():
     global board
     for i in range(8):
@@ -29,7 +28,7 @@ class Queen:
             return False
         self.current_pos = coordinates
         board[y][x] = self
-        board[cur_y][cur_x] = -1 if board[cur_y - 1][cur_x] == 0 else 0
+        board[cur_y][cur_x] = -1 if (cur_y+cur_x) % 2 == 0 else 0
 
     def validate_move(self, coordinates):
         # STILL MISSING INVALID MOVEMENT BECAUSE PROTECTING KING
@@ -108,7 +107,7 @@ class Rook:
             return False
         self.current_pos = coordinates
         board[y][x] = self
-        board[cur_y][cur_x] = -1 if board[cur_y - 1][cur_x] == 0 else 0
+        board[cur_y][cur_x] = -1 if (cur_y+cur_x) % 2 == 0 else 0
 
     def validate_move(self, coordinates):
         # STILL MISSING INVALID MOVEMENT BECAUSE PROTECTING KING
@@ -177,7 +176,7 @@ class Bishop:
             return False
         self.current_pos = coordinates
         board[y][x] = self
-        board[cur_y][cur_x] = self.cells
+        board[cur_y][cur_x] = -1 if (cur_y+cur_x) % 2 == 0 else 0
 
     def validate_move(self, coordinates):
         # STILL MISSING INVALID MOVEMENT BECAUSE PROTECTING KING
@@ -242,7 +241,7 @@ class Knight:
             return False
         self.current_pos = coordinates
         board[y][x] = self
-        board[cur_y][cur_x] = -1 if board[cur_y - 1][cur_x] == 0 else 0
+        board[cur_y][cur_x] = -1 if (cur_y+cur_x) % 2 == 0 else 0
 
     def validate_move(self, coordinates):
         # STILL MISSING INVALID MOVEMENT BECAUSE PROTECTING KING
@@ -303,8 +302,7 @@ class Pawn:
             self.first_move = False
         self.change_pos(coordinates)
         board[y][x] = self
-        board[cur_y][cur_x] = -1 if board[cur_y - 1][cur_x] == 0 else 0
-        return
+        board[cur_y][cur_x] = -1 if (cur_y+cur_x) % 2 == 0 else 0
 
     def validate_move(self, coordinates):
         # STILL MISSING INVALID MOVEMENT BECAUSE PROTECTING KING
@@ -394,7 +392,13 @@ print(len(queen1.available_moves()))
 print(len(knight1.available_moves()))
 print(len(bishop1.available_moves()))
 print(len(rook1.available_moves()))
-print(len(pawn1.available_moves()))
+print(pawn4.available_moves())
+pawn4.move((3, 3))
+print()
+print(print_board())
+print(len(queen1.available_moves()))
+print(len(bishop1.available_moves()))
+
 
 class King:
     def __init__(self, color, current_pos=None):
