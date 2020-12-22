@@ -83,13 +83,20 @@ class Queen:
         for i in range(8):
             for j in range(8):
                 if self.validate_move((i, j)) and not (i, j) == self.current_pos:
-                    if self.same_color((i, j)):
+                    if self.same_color((i, j)) or self.is_check((i, j)):
                         continue
                     moves.append((i, j))
         return moves
 
-    def is_check(self):
-        return self
+    def is_check(self, move):
+        global board
+        for i in range(8):
+            for j in range(8):
+                if not (board[i][j] == 0 or board[i][j] == -1) and board[i][j].color == self.color:
+                    if type(board[i][j]) == King:
+                        if not board[i][j].temporal_move(self, move):
+                            return True
+                        return False
 
 
 class Rook:
@@ -151,13 +158,20 @@ class Rook:
         for i in range(8):
             for j in range(8):
                 if self.validate_move((i, j)) and not (i, j) == self.current_pos:
-                    if self.same_color((i, j)):
+                    if self.same_color((i, j)) or self.is_check((i, j)):
                         continue
                     moves.append((i, j))
         return moves
 
-    def is_check(self):
-        return self
+    def is_check(self, move):
+        global board
+        for i in range(8):
+            for j in range(8):
+                if not (board[i][j] == 0 or board[i][j] == -1) and board[i][j].color == self.color:
+                    if type(board[i][j]) == King:
+                        if not board[i][j].temporal_move(self, move):
+                            return True
+                        return False
 
 
 class Bishop:
@@ -217,13 +231,20 @@ class Bishop:
         for i in range(8):
             for j in range(8):
                 if self.validate_move((i, j)) and not (i, j) == self.current_pos:
-                    if self.same_color((i, j)):
+                    if self.same_color((i, j)) or self.is_check((i, j)):
                         continue
                     moves.append((i, j))
         return moves
 
-    def is_check(self):
-        return self
+    def is_check(self, move):
+        global board
+        for i in range(8):
+            for j in range(8):
+                if not (board[i][j] == 0 or board[i][j] == -1) and board[i][j].color == self.color:
+                    if type(board[i][j]) == King:
+                        if not board[i][j].temporal_move(self, move):
+                            return True
+        return False
 
 
 class Knight:
@@ -271,13 +292,20 @@ class Knight:
         for i in range(8):
             for j in range(8):
                 if self.validate_move((i, j)) and not (i, j) == self.current_pos:
-                    if self.same_color((i, j)):
+                    if self.same_color((i, j)) or self.is_check((i, j)):
                         continue
                     moves.append((i, j))
         return moves
 
-    def is_check(self):
-        return self
+    def is_check(self, move):
+        global board
+        for i in range(8):
+            for j in range(8):
+                if not (board[i][j] == 0 or board[i][j] == -1) and board[i][j].color == self.color:
+                    if type(board[i][j]) == King:
+                        if not board[i][j].temporal_move(self, move):
+                            return True
+        return False
 
 
 class Pawn:
@@ -287,7 +315,7 @@ class Pawn:
         self.image = 'Pieces\\pawn_' + self.color + '.png'
         self.current_pos = current_pos
         self.first_move = first_move
-        self.view = 1
+        self.view = view
 
     def change_pos(self, coordinates):
         self.current_pos = coordinates
@@ -351,13 +379,20 @@ class Pawn:
         for i in range(8):
             for j in range(8):
                 if self.validate_move((i, j)) and not (i, j) == self.current_pos:
-                    if self.same_color((i, j)):
+                    if self.same_color((i, j)) or self.is_check((i, j)):
                         continue
                     moves.append((i, j))
         return moves
 
-    def is_check(self):
-        return self
+    def is_check(self, move):
+        global board
+        for i in range(8):
+            for j in range(8):
+                if not (board[i][j] == 0 or board[i][j] == -1) and board[i][j].color == self.color:
+                    if type(board[i][j]) == King:
+                        if not board[i][j].temporal_move(self, move):
+                            return True
+        return False
 
 
 class King:
@@ -369,7 +404,13 @@ class King:
         self.moved = moved
 
     def move(self, coordinates):
-        pass
+        global board
+        cur_y, cur_x = self.current_pos
+        y, x = coordinates
+        if not self.validate_move(coordinates):
+            return False
+        board[y][x] = self
+        board[cur_y][cur_x] = -1 if (cur_y+cur_x) % 2 == 0 else 0
 
     def validate_move(self, coordinates):
         if not self.trajectory(coordinates) or self.same_color(coordinates) or self.unavailable(coordinates):
@@ -432,8 +473,11 @@ class King:
 
     def checkmate(self):
         if self.check() and self.available_moves() == []:
-            if not self.team_pieces()[0]:
+            if self.team_pieces()[0]:
                 return True
+            if self.protect() == []:
+                return True
+        return False
 
     def team_pieces(self):
         global board
@@ -441,14 +485,47 @@ class King:
         for i in range(8):
             for j in range(8):
                 if not (board[i][j] == 0 or board[i][j] == -1):
-                    if board[i][j].color == self.color:
+                    if board[i][j].color == self.color and not board[i][j] == self:
                         t_pieces.append(board[i][j])
-        if t_pieces is []:
+        if t_pieces == []:
             return True, None
         return False, t_pieces
 
-    def red_cells(self):
-        pass
+    def protect(self):
+        global board
+        protection_moves = []
+        for i in range(8):
+            for j in range(8):
+                if not (board[i][j] == 0 or board[i][j] == -1) and not board[i][j].color == self.color:
+                    target = board[i][j].available_moves()
+                    target.append(board[i][j].current_pos) # appending current position of the threatening piece
+                    if self.current_pos in target: # Check is True
+                        team = self.team_pieces()[1]
+                        for piece in team:
+                            piece_moves = piece.available_moves()
+                            for move in piece_moves:
+                                if move in target:
+                                    if self.temporal_move(piece, move):
+                                        protection_moves.append((piece.score, move))
+        return protection_moves
+
+    def temporal_move(self, piece, coordinates):
+        global board
+        y, x = coordinates
+        cur_y, cur_x = piece.current_pos
+        piece.current_pos = coordinates
+        temp = board[y][x]
+        board[y][x] = piece
+        board[cur_y][cur_x] = -1 if (cur_y+cur_x) % 2 == 0 else 0
+        if self.check():
+            board[y][x] = temp
+            board[cur_y][cur_x] = piece
+            piece.current_pos = (cur_y, cur_x)
+            return False # Move does not protect the king
+        board[y][x] = temp
+        board[cur_y][cur_x] = piece
+        piece.current_pos = (cur_y, cur_x)
+        return True
 
 
 board = [[0 for i in range(8)] for j in range(8)]
@@ -457,33 +534,3 @@ for i in range(8):
         if (i + j) % 2 == 0:
             board[i][j] = -1
 
-
-#rook1 = Rook('white')
-#knight1 = Knight('white')
-#bishop1 = Bishop('white',-1)
-#queen1 = Queen('white')
-pawn1 = Pawn('white')
-pawn2 = Pawn('white')
-pawn3 = Pawn('white')
-pawn4 = Pawn('white')
-king1 = King('black')
-
-#board[0][0], board[0][1], board[0][2], board[0][3] = rook1, knight1, bishop1, queen1
-board[1][0], board[1][1], board[1][2], board[1][3] = pawn1, pawn2, pawn3, pawn4
-board[2][2] = king1
-
-king1.current_pos = (2, 2)
-#rook1.current_pos = (0, 0)
-#knight1.current_pos = (0, 1)
-#bishop1.current_pos = (0, 2)
-#queen1.current_pos = (0, 3)
-pawn1.current_pos, pawn2.current_pos, pawn3.current_pos, pawn4.current_pos = (1, 0), (1, 1), (1, 2), (1, 3)
-print_board()
-print()
-
-#print(len(queen1.available_moves()))
-#print(len(knight1.available_moves()))
-#print(len(bishop1.available_moves()))
-#print(len(rook1.available_moves()))
-#print(len(pawn4.available_moves()))
-print(king1.available_moves())
