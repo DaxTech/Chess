@@ -35,7 +35,7 @@ class Piece:
         c4 = self.is_blocked(board, coordinates)
         c5 = self.same_color(board, coordinates)
 
-        if not c2 and c1 and c3:
+        if not c2 and c1 and c3 and not c5:
             return True
         if c1 or c2 or not c3 or c4 or c5:
             return False
