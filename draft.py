@@ -122,6 +122,7 @@ pygame.display.set_caption('Chess')
 
 running = True
 selected = None
+white_turn = True
 while running:
     test.draw_cells()
     if test.checkmate():
@@ -135,14 +136,21 @@ while running:
                 pos_y, pos_x = test.get_pos((cur_y, cur_x))
                 if type(test.board[pos_y][pos_x]) == int:
                     continue
+                if (test.board[pos_y][pos_x].color == 'black' and white_turn)\
+                   or (test.board[pos_y][pos_x].color == 'white' and not white_turn):
+                    continue
+
                 selected = test.board[pos_y][pos_x]
-                print(selected)
             else:
                 cur_x, cur_y = event.pos
                 pos_y, pos_x = test.get_pos((cur_y, cur_x))
-                selected.move(test.board, (pos_y, pos_x))
-                print('MOVED TO', (pos_y, pos_x))
+                if selected.move(test.board, (pos_y, pos_x)):
+                    if white_turn:
+                        white_turn = False
+                    else:
+                        white_turn = True
                 selected = None
+                continue
 
 
 while not running:
