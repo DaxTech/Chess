@@ -41,7 +41,7 @@ class Game:
             for j in range(8):
                 if type(self.board[i][j]) == King:
                     king = self.board[i][j]
-                    if king.check(self.board):
+                    if king.check(self.board) and not king.available_moves(self.board):
                         team = king.get_team_pieces(self.board)
                         if not team:
                             font = pygame.font.SysFont('comicsans', 80, True)
@@ -52,16 +52,19 @@ class Game:
                             self.screen.blit(text, (200, 200))
                             pygame.display.flip()
                             return True
+                        counts = 0
                         for piece in team:
                             if not piece.available_moves(self.board):
+                                counts += 1
                                 font = pygame.font.SysFont('comicsans', 80, True)
-                                if king.color == 'white':
-                                    text = font.render('BLACK WON', 1, (0, 0, 0))
-                                else:
-                                    text = font.render('WHITE WON', 1, (0, 0, 255))
-                                self.screen.blit(text, (200, 200))
-                                pygame.display.flip()
-                                return True
+                        if king.color == 'white':
+                            text = font.render('BLACK WON', 1, (0, 0, 0))
+                        else:
+                            text = font.render('WHITE WON', 1, (0, 0, 255))
+                        if counts == len(team):
+                            self.screen.blit(text, (200, 200))
+                            pygame.display.flip()
+                            return True
         return False
 
 
