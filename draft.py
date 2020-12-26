@@ -4,6 +4,8 @@ import pygame
 from pieces import *
 
 
+PATH = '.\\chess_pieces\\'
+
 class Game:
 
     def __init__(self, screen):
@@ -12,27 +14,27 @@ class Game:
 
     @staticmethod
     def format_board():
-        board = [[-1 if (z+e) % 2 == 0 else 0 for z in range(8)] for e in range(8)]
-        wpawn1, wpawn2, wpawn3, wpawn4 = Pawn('white'), Pawn('white'), Pawn('white'), Pawn('white')
-        wpawn5, wpawn6, wpawn7, wpawn8 = Pawn('white'), Pawn('white'), Pawn('white'), Pawn('white')
-        wrook1, wrook2, wknight1, wknight2 = Rook('white'), Rook('white'), Knight('white'), Knight('white')
-        wbishop1, wbishop2, wqueen, wking = Bishop('white'), Bishop('white'), Queen('white'), King('white')
-        bpawn1, bpawn2, bpawn3, bpawn4 = Pawn('black', view=-1), Pawn('black', view=-1), Pawn('black', view=-1), Pawn('black', view=-1)
-        bpawn5, bpawn6, bpawn7, bpawn8 = Pawn('black', view=-1), Pawn('black', view=-1), Pawn('black', view=-1), Pawn('black', view=-1)
-        brook1, brook2, bknight1, bknight2 = Rook('black'), Rook('black'), Knight('black'), Knight('black')
-        bbishop1, bbishop2, bqueen, bking = Bishop('black'), Bishop('black'), Queen('black'), King('black')
-        white_pieces = [[wrook1, wknight1, wbishop1, wqueen, wking, wbishop2, wknight2, wrook2],
-                        [wpawn1, wpawn2, wpawn3, wpawn4, wpawn5, wpawn6, wpawn7, wpawn8]]
-        black_pieces = [[brook1, bknight1, bbishop1, bqueen, bking, bbishop2, bknight2, brook2],
-                        [bpawn1, bpawn2, bpawn3, bpawn4, bpawn5, bpawn6, bpawn7, bpawn8]]
-        for i in range(2):
-            for j in range(8):
-                board[i][j] = white_pieces[i][j]
-                white_pieces[i][j].current_pos = (i, j)
-        for i in range(7, 5, -1):
-            for j in range(8):
-                board[i][j] = black_pieces[abs(i-7)][j]
-                black_pieces[abs(i-7)][j].current_pos = (i, j)
+        # REDO - LET THE PIECES BE SETTLED ON A FOR LOOP, WE DON'T CARE ABOUT CREATING VARIABLES FOR THEM.
+        board = [[0 if (z+e) % 2 == 0 else -1 for z in range(8)] for e in range(8)]
+        for i in range(8):
+            board[1][i] = Pawn('black', current_pos=(1, i))
+            board[6][i] = Pawn('white', view=-1, current_pos=(6, i))
+        for i in range(8):
+            if i == 0 or i == 7:
+                board[0][i] = Rook('black', current_pos=(0, i))
+                board[7][i] = Rook('white', current_pos=(7, i))
+            if i == 1 or i == 6:
+                board[0][i] = Knight('black', current_pos=(0, i))
+                board[7][i] = Knight('white', current_pos=(7, i))
+            if i == 2 or i == 5:
+                board[0][i] = Bishop('black', current_pos=(0, i))
+                board[7][i] = Bishop('white', current_pos=(7, i))
+            if i == 3:
+                board[0][i] = Queen('black', current_pos=(0, i))
+                board[7][i] = Queen('white', current_pos=(7, i))
+            if i == 4:
+                board[0][i] = King('black', current_pos=(0, i))
+                board[7][i] = King('white', current_pos=(7, i))
 
         return board
 
@@ -67,6 +69,29 @@ class Game:
                             return True
         return False
 
+    def stalemate(self, turn):
+        turn = 'white' if turn else 'black'
+        counts = 0
+        for i in range(8):
+            for j in range(8):
+                if not type(self.board[i][j]) == int:
+                    counts += 1
+        if counts == 2:
+            return True
+        
+        for i in range(8):
+            for j in range(8):
+                if type(self.board[i][j]) == King and self.board[i][j].color == turn:
+                    king = self.board[i][j]
+                    if king.check(self.board) or king.available_moves(self.board):
+                        return False
+                    team = king.get_team_pieces(self.board)
+                    if not team:
+                        return True
+                    for piece in team:
+                        if piece.available_moves(self.board):
+                            return False
+                    return True
 
     def divide(self):
         for i in range(80, 640, 80):
@@ -81,32 +106,30 @@ class Game:
                 x = n * i
                 y = n * j
                 if (i+j) % 2 == 0:
-                    pygame.draw.rect(self.screen, (155, 118, 83), (y, x, 80, 80))
-                else:
                     pygame.draw.rect(self.screen, (255, 255, 255), (y, x, 80, 80))
-
+                else:
+                    pygame.draw.rect(self.screen, (155, 118, 83), (y, x, 80, 80))
                 if not (self.board[i][j] == 0 or self.board[i][j] == -1):
-                    font = pygame.font.SysFont('comicsans', 64, True)
                     temp = self.board[i][j]
-                    color = (0, 0, 0) if temp.color == 'black' else (0, 0, 255)
+                    color = temp.color[0]
                     if temp.score == 1:
-                        text = font.render('P', 1, color)
-                        self.screen.blit(text, (y, x))
+                        piece = pygame.image.load(PATH+ color+'Pawn.png')
+                        self.screen.blit(piece, (y, x))
                     elif temp.score == 3:
-                        text = font.render('Kn', 1, color)
-                        self.screen.blit(text, (y, x))
+                        piece = pygame.image.load(PATH+ color+'Knight.png')
+                        self.screen.blit(piece, (y, x))
                     elif temp.score == 3.5:
-                        text = font.render('B', 1, color)
-                        self.screen.blit(text, (y, x))
+                        piece = pygame.image.load(PATH+ color + 'Bishop.png')
+                        self.screen.blit(piece, (y, x))
                     elif temp.score == 5:
-                        text = font.render('R', 1, color)
-                        self.screen.blit(text, (y, x))
+                        piece = pygame.image.load(PATH+ color + 'Rook.png')
+                        self.screen.blit(piece, (y, x))
                     elif temp.score == 9:
-                        text = font.render('Q', 1, color)
-                        self.screen.blit(text, (y, x))
+                        piece = pygame.image.load(PATH+ color + 'Queen.png')
+                        self.screen.blit(piece, (y, x))
                     elif temp.score == 10:
-                        text = font.render('K', 1, color)
-                        self.screen.blit(text, (y, x))
+                        piece = pygame.image.load(PATH+ color + 'King.png')
+                        self.screen.blit(piece, (y, x))
         pygame.display.flip()
 
     @staticmethod
@@ -126,10 +149,14 @@ pygame.display.set_caption('Chess')
 running = True
 selected = None
 white_turn = True
+#print(test.board[0][4].can_castle(test.board, (0, 6)))
 while running:
     test.draw_cells()
-    if test.checkmate():
-        running = False
+    #if test.checkmate():
+    #    running = False
+    #if test.stalemate(white_turn):
+    #    running = False
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
