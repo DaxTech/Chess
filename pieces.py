@@ -217,7 +217,9 @@ class Pawn(Piece):
         board[cur_y][cur_x] = 0 if (cur_y + cur_x) % 2 == 0 else -1
         if self.first_move:
             self.first_move = False
-        self.just_moved = True
+            self.just_moved = True
+            return True
+        self.just_moved = False
         return True
 
     def validate_move(self, board, coordinates):
@@ -228,6 +230,8 @@ class Pawn(Piece):
         c4 = self.is_blocked(board, coordinates)
         c5 = self.same_color(board, coordinates)
 
+        if self.en_passant(board, coordinates) and not c2 and not c1:
+            return True
         if not c2 and c1 and (c3 or c):
             return True
         if c1 or c2:
@@ -275,7 +279,6 @@ class Pawn(Piece):
         return result1
 
     def en_passant(self, board, coordinates):
-        # REVIEW
         cur_y, cur_x = self.current_pos
         y, x = coordinates
         n = 4 if self.view == 1 else 3
@@ -287,6 +290,7 @@ class Pawn(Piece):
             return False
         if not board[n][x].just_moved:
             return False
+        board[n][x] = 0 if (n+x) % 2 == 0 else -1
         return True
 
     @staticmethod
@@ -308,6 +312,12 @@ class King(Piece):
         y, x = coordinates
         if not self.validate_move(board, coordinates):
             return False
+
+        if self.can_castle(board, coordinates):
+            if x < cur_x:
+                board[y][0].move(board, (y, x+1), forced=True)
+            else:
+                board[y][7].move(board, (y, x-1), forced=True)
         self.current_pos = coordinates
         board[y][x] = self
         board[cur_y][cur_x] = 0 if (cur_y+cur_x) % 2 == 0 else -1
@@ -330,7 +340,6 @@ class King(Piece):
         y, x = coordinates
         condition1 = (abs(cur_y - y) == 1 or cur_y == y)
         condition2 = (abs(cur_x - x) == 1 or cur_x == x)
-        #condition3 = self.can_castle(board, coordinates)
         if condition1 and condition2:
             return True
         return False
@@ -356,7 +365,6 @@ class King(Piece):
             e = cur_x + i * m
             if not type(board[y][e]) == int or self.will_check(board, (y, e)):
                 return False
-        board[y][n].move(board, (y, x-1*m), forced=True)
         return True
 
     def check(self, board):

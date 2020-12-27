@@ -6,6 +6,7 @@ from pieces import *
 
 PATH = '.\\chess_pieces\\'
 
+
 class Game:
 
     def __init__(self, screen):
@@ -93,6 +94,14 @@ class Game:
                             return False
                     return True
 
+    def pawns(self, white):
+        for i in range(8):
+            if type(self.board[3][i]) == Pawn and self.board[3][i].color == 'black' and \
+              not white:
+                self.board[3][i].just_moved = False
+            if type(self.board[4][i]) == Pawn and self.board[4][i].color == 'white' and white:
+                self.board[4][i].just_moved = False
+
     def divide(self):
         for i in range(80, 640, 80):
             pygame.draw.line(self.screen, (0, 0, 0), (i, 0), (i, 640))
@@ -149,13 +158,13 @@ pygame.display.set_caption('Chess')
 running = True
 selected = None
 white_turn = True
-#print(test.board[0][4].can_castle(test.board, (0, 6)))
 while running:
     test.draw_cells()
-    #if test.checkmate():
-    #    running = False
-    #if test.stalemate(white_turn):
-    #    running = False
+    test.pawns(white_turn)
+    if test.checkmate():
+        running = False
+    if test.stalemate(white_turn):
+        running = False
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
