@@ -4,9 +4,6 @@ import pygame
 from pieces import *
 
 
-PATH = '.\\chess_pieces\\'
-
-
 class Game:
 
     def __init__(self, screen):
@@ -120,25 +117,8 @@ class Game:
                     pygame.draw.rect(self.screen, (155, 118, 83), (y, x, 80, 80))
                 if not (self.board[i][j] == 0 or self.board[i][j] == -1):
                     temp = self.board[i][j]
-                    color = temp.color[0]
-                    if temp.score == 1:
-                        piece = pygame.image.load(PATH+ color+'Pawn.png')
-                        self.screen.blit(piece, (y, x))
-                    elif temp.score == 3:
-                        piece = pygame.image.load(PATH+ color+'Knight.png')
-                        self.screen.blit(piece, (y, x))
-                    elif temp.score == 3.5:
-                        piece = pygame.image.load(PATH+ color + 'Bishop.png')
-                        self.screen.blit(piece, (y, x))
-                    elif temp.score == 5:
-                        piece = pygame.image.load(PATH+ color + 'Rook.png')
-                        self.screen.blit(piece, (y, x))
-                    elif temp.score == 9:
-                        piece = pygame.image.load(PATH+ color + 'Queen.png')
-                        self.screen.blit(piece, (y, x))
-                    elif temp.score == 10:
-                        piece = pygame.image.load(PATH+ color + 'King.png')
-                        self.screen.blit(piece, (y, x))
+                    piece = pygame.image.load(temp.image)
+                    self.screen.blit(piece, (y, x))
         pygame.display.flip()
 
     @staticmethod

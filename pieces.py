@@ -1,5 +1,7 @@
 #! python3
 
+PATH = '.\\chess_pieces\\'
+
 
 class Piece:
     """
@@ -237,6 +239,7 @@ class Queen(Piece):
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
         self.score = 9  # num value of the queen.
+        self.image = PATH+color[0]+'Queen.png'
 
     def trajectory(self, board: list, coordinates: tuple):
         y, x = coordinates
@@ -284,6 +287,7 @@ class Rook(Piece):
         super().__init__(color, current_pos)
         self.score = 5  # num value of the rook
         self.moved = moved
+        self.image = PATH + color[0] + 'Rook.png'
 
     def trajectory(self, board: list, coordinates: tuple):
         y, x = coordinates
@@ -316,6 +320,7 @@ class Bishop(Piece):
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
         self.score = 3.5  # num value of the bishop.
+        self.image = PATH + color[0] + 'Bishop.png'
 
     def trajectory(self, board: list, coordinates: tuple):
         cur_y, cur_x = self.current_pos
@@ -346,6 +351,7 @@ class Knight(Piece):
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
         self.score = 3  # num value of the knight
+        self.image = PATH + color[0] + 'Knight.png'
 
     def validate_move(self, board: list, coordinates: tuple):
         # Does not contain the is_blocked() condition, as knights
@@ -383,6 +389,7 @@ class Pawn(Piece):
         self.first_move = first_move
         self.view = view
         self.just_moved = just_moved
+        self.image = PATH + color[0] + 'Pawn.png'
 
     def move(self, board: list, coordinates: tuple, forced=False):
         cur_y, cur_x = self.current_pos
@@ -509,6 +516,7 @@ class King(Piece):
         super().__init__(color, current_pos)
         self.score = 10  # num value of the king
         self.moved = moved
+        self.image = PATH + color[0] + 'King.png'
 
     def move(self, board: list, coordinates: tuple, forced=False):
         cur_y, cur_x = self.current_pos
