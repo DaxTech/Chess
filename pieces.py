@@ -22,8 +22,7 @@ class Piece:
         c3 = self.trajectory(board, coordinates)
         c4 = self.is_blocked(board, coordinates)
         c5 = self.same_color(board, coordinates)
-
-        if not c2 and c1 and c3 and not c5:
+        if not c2 and c1 and c3 and not (c5 or c4):
             return True
         if c1 or c2 or not c3 or c4 or c5:
             return False
@@ -229,10 +228,9 @@ class Pawn(Piece):
         c3 = self.trajectory(board, coordinates)
         c4 = self.is_blocked(board, coordinates)
         c5 = self.same_color(board, coordinates)
-
         if self.en_passant(board, coordinates) and not c2 and not c1:
             return True
-        if not c2 and c1 and (c3 or c):
+        if not c2 and c1 and ((c3 and not c4) or c):
             return True
         if c1 or c2:
             return False
