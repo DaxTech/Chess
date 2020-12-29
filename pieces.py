@@ -362,7 +362,7 @@ class Knight(Piece):
         c4 = self.same_color(board, coordinates)
         if not c2 and c1 and c3:
             return True
-        if c1 or not c3 or c4:
+        if c1 or c2 or not c3 or c4:
             return False
         return True
 
@@ -396,13 +396,22 @@ class Pawn(Piece):
         y, x = coordinates
         if not self.validate_move(board, coordinates):
             return False
+        # Handling take of en_passant exception.
+        if self.en_passant(board, coordinates):
+            n = y+1 if self.view == -1 else y-1  # one before or one after
+            board[n][x] = 0 if (n + x) % 2 == 0 else -1
         self.current_pos = coordinates
         board[y][x] = self
         board[cur_y][cur_x] = 0 if (cur_y + cur_x) % 2 == 0 else -1
+
         if self.first_move:
             self.first_move = False  # cannot move 2 cells ahead anymore
             self.just_moved = True  # important for en passant exception.
+            if y == 0 or y == 7:
+                board[y][x] = Queen(self.color, current_pos=coordinates)
             return True
+        if y == 0 or y == 7:
+            board[y][x] = Queen(self.color, current_pos=coordinates)
         self.just_moved = False
         return True
 
@@ -496,7 +505,6 @@ class Pawn(Piece):
             return False
         if not board[n][x].just_moved:
             return False
-        board[n][x] = 0 if (n + x) % 2 == 0 else -1
         return True
 
     @staticmethod
