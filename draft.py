@@ -106,6 +106,9 @@ class Game:
         pygame.display.flip()
 
     def draw_cells(self):
+        # REVIEW TOMORROW, THE MECHANICS WORK.
+        # FIGURE OUT A WAY OF UPDATING THE BOARD WHILE THE PIECE IS MOVING, WITHOUT
+        # MAKING EVERYTHING SEEM LAGGY AND SHIT LIKE THAT.
         n = 80
         for i in range(8):
             for j in range(8):
@@ -115,11 +118,35 @@ class Game:
                     pygame.draw.rect(self.screen, (255, 255, 255), (y, x, 80, 80))
                 else:
                     pygame.draw.rect(self.screen, (155, 118, 83), (y, x, 80, 80))
-                if not (self.board[i][j] == 0 or self.board[i][j] == -1):
+                if not type(self.board[i][j]) == int:
                     temp = self.board[i][j]
                     piece = pygame.image.load(temp.image)
+                    # if source is not None and destination is not None \
+                    #         and destination == (i, j):
+                    #     y1, x1 = source
+                    #     y2, x2 = destination
+                    #     difference = abs(y1 - y2) * 80 if not y2 == y1 else abs(x1 - x2) * 80
+                    #     nx = -0.1 if x2 < x1 else 0.1
+                    #     ny = -0.1 if y2 < y1 else 0.1
+                    #
+                    #     y1, x1 = y1 * 80, x1 * 80
+                    #     y2, x2 = y2 * 80, x2 * 80
+                    #     self.screen.blit(piece, (x1, y1))
+                    #     pygame.display.flip()
+                    #     for z in range(difference * 10):
+                    #
+                    #         if y1 != y2:
+                    #             y1 += ny
+                    #         if not x1 == x2:
+                    #             x1 += nx
+                    #         self.screen.blit(piece, (x1, y1))
+                    #         pygame.display.flip()
+                    # else:
                     self.screen.blit(piece, (y, x))
+                    pygame.display.flip()
         pygame.display.flip()
+
+
 
     @staticmethod
     def get_pos(coordinates):
@@ -138,6 +165,7 @@ pygame.display.set_caption('Chess')
 running = True
 selected = None
 white_turn = True
+src, dsn = None, None
 while running:
     test.draw_cells()
     test.pawns(white_turn)
@@ -145,7 +173,8 @@ while running:
         running = False
     if test.stalemate(white_turn):
         running = False
-
+    if selected is None:
+        dsn, src = None, None
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -163,7 +192,9 @@ while running:
             else:
                 cur_x, cur_y = event.pos
                 pos_y, pos_x = test.get_pos((cur_y, cur_x))
+                src = selected.current_pos
                 if selected.move(test.board, (pos_y, pos_x)):
+                    dsn = (pos_y, pos_x)
                     if white_turn:
                         white_turn = False
                     else:
