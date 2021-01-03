@@ -424,12 +424,9 @@ class Pawn(Piece):
         c5 = self.same_color(board, coordinates)
         # En passant exception movement
         if self.en_passant(board, coordinates) and not (c2 or c1):
-            print('EN PASSANT')
             return True
         # Movement won't check, but king is in check right now.
         if not c2 and c1 and ((c3 and not c4) or a):
-            print(c2)
-            print('HERE')
             return True
         if c1 or c2:  # movement will check or king is in check now.
             return False
@@ -604,9 +601,9 @@ class King(Piece):
                 return False
         return True
 
-    def check(self, board: list):
+    def knight_check(self, board: list):
         """
-        Returns True if King is in check, False otherwise.
+        Returns True if King is in check originated from a Knight, False otherwise.
 
         Parameters
         ----------
@@ -614,8 +611,64 @@ class King(Piece):
             chess board.
         """
         y, x = self.current_pos
-        # Going through diagonals
-        # Upper left diagonal
+        # All possible knight moves EVER
+        knight_moves = [
+                    (y - 2, x + 1), (y - 2, x - 1),
+                    (y + 2, x + 1), (y + 2, x - 1),
+                    (y + 1, x - 2), (y - 1, x - 2),
+                    (y + 1, x + 2), (y - 1, x + 2)]
+        # List containing valid moves depending on cur pos.
+        final_moves = []
+        for m in knight_moves:
+            c1 = m[0] < 0 or m[0] > 7
+            c2 = m[1] < 0 or m[1] > 7
+            if not (c1 or c2): # both need to conditions evaluate to False.
+                final_moves.append(m)
+        for y_pos, x_pos in final_moves:
+            if type(board[y_pos][x_pos]) == Knight and \
+                not board[y_pos][x_pos].color == self.color:
+                return True
+        return False
+
+    def vertical_horizontal_check(self, board: list):
+        """
+        Returns True if King is in check vertically or horizontally, False otherwise.
+
+        Parameters
+        ----------
+        board: list
+            chess board.
+        """
+        y, x = self.current_pos
+        # Going through vertical/horizontal lines.
+        straight_threats = [Rook, Queen]
+        for i in range(8):
+            # Horizontal check.
+            if type(board[y][i]) in straight_threats and \
+               not board[y][i].color == self.color:
+                target = board[y][i].all_moves(board)
+                if self.current_pos in target:
+                    return True
+            # Vertical check.
+            if type(board[i][x]) in straight_threats and \
+               not board[i][x].color == self.color:
+                target = board[i][x].all_moves(board)
+                if self.current_pos in target:
+                    return True
+        return False
+
+    def diagonal_check(self, board: list):
+        """
+        Returns True if King is in check diagonally, False otherwise.
+
+        Parameters
+        ----------
+        board: list
+            chess board.
+        """
+        y, x = self.current_pos
+        # Going through diagonals.
+        # Upper left diagonal.
         n = y if y < x else x
         low_y, low_x = y - n, x - n
         iter_y = [e for e in range(low_y, 8)]
@@ -627,7 +680,7 @@ class King(Piece):
                 target = board[i][j].all_moves(board)
                 if self.current_pos in target:
                     return True
-        # Lower left diagonal
+        # Lower left diagonal.
         n = (7 - y) if (7 - y) < x else x
         high_y = y + n
         high_x = x - n
@@ -639,34 +692,21 @@ class King(Piece):
                 target = board[i][j].all_moves(board)
                 if self.current_pos in target:
                     return True
-        # Going through vertical/horizontal lines
-        straight_threats = [Rook, Queen]
-        for i in range(8):
-            if type(board[y][i]) in straight_threats and \
-               not board[y][i].color == self.color:
-                target = board[y][i].all_moves(board)
-                if self.current_pos in target:
-                    return True
-            if type(board[i][x]) in straight_threats and \
-               not board[i][x].color == self.color:
-                target = board[i][x].all_moves(board)
-                if self.current_pos in target:
-                    return True
-        knight_moves = [
-            (y - 2, x + 1), (y - 2, x - 1),
-            (y + 2, x + 1), (y + 2, x - 1),
-            (y + 1, x - 2), (y - 1, x - 2),
-            (y + 1, x + 2), (y - 1, x + 2)]
+        return False
 
-        final_moves = []
-        for m in knight_moves:
-            c1 = m[0] < 0 or m[0] > 7
-            c2 = m[1] < 0 or m[1] > 7
-            if not c1 and not c2:
-                final_moves.append(m)
-        for y_pos, x_pos in final_moves:
-            if type(board[y_pos][x_pos]) == Knight and \
-               not board[y_pos][x_pos].color == self.color:
+    def check(self, board: list):
+        """
+        Returns True if King is in check, False otherwise.
+
+        Parameters
+        ----------
+        board: list
+            chess board.
+        """
+        danger  = [self.diagonal_check(board), self.vertical_horizontal_check(board), self.knight_check(board)]
+        # (b means bool, as every element of danger is a boolean value)
+        for b in danger:
+            if b:
                 return True
         return False
 
