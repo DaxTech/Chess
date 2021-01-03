@@ -424,9 +424,12 @@ class Pawn(Piece):
         c5 = self.same_color(board, coordinates)
         # En passant exception movement
         if self.en_passant(board, coordinates) and not (c2 or c1):
+            print('EN PASSANT')
             return True
         # Movement won't check, but king is in check right now.
-        if not c2 and c1 and (c3 and not c4) or a:
+        if not c2 and c1 and ((c3 and not c4) or a):
+            print(c2)
+            print('HERE')
             return True
         if c1 or c2:  # movement will check or king is in check now.
             return False
