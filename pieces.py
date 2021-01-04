@@ -238,6 +238,7 @@ class Queen(Piece):
 
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
+        self.letter = 'Q'
         self.score = 9  # num value of the queen.
         self.image = PATH+color[0]+'Queen.png'
 
@@ -285,6 +286,7 @@ class Rook(Piece):
     """
     def __init__(self, color: str, current_pos=None, moved=False):
         super().__init__(color, current_pos)
+        self.letter = 'R'
         self.score = 5  # num value of the rook
         self.moved = moved
         self.image = PATH + color[0] + 'Rook.png'
@@ -319,6 +321,7 @@ class Bishop(Piece):
     """
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
+        self.letter = 'B'
         self.score = 3.5  # num value of the bishop.
         self.image = PATH + color[0] + 'Bishop.png'
 
@@ -350,6 +353,7 @@ class Knight(Piece):
     """
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
+        self.letter = 'N'
         self.score = 3  # num value of the knight
         self.image = PATH + color[0] + 'Knight.png'
 
@@ -385,6 +389,7 @@ class Pawn(Piece):
     def __init__(self, color: str, current_pos=None, first_move=True,
                  view=1, just_moved=False):
         super().__init__(color, current_pos)
+        self.letter = 'P'
         self.score = 1  # num value of the pawn
         self.first_move = first_move
         self.view = view
@@ -522,6 +527,7 @@ class King(Piece):
     """
     def __init__(self, color: str, current_pos=None, moved=False):
         super().__init__(color, current_pos)
+        self.letter = 'K'
         self.score = 10  # num value of the king
         self.moved = moved
         self.image = PATH + color[0] + 'King.png'
@@ -671,8 +677,9 @@ class King(Piece):
         # Upper left diagonal.
         n = y if y < x else x
         low_y, low_x = y - n, x - n
-        iter_y = [e for e in range(low_y, 8)]
-        iter_x = [z for z in range(low_x, 8)]
+        n2 = low_y if low_y < low_x else low_x
+        iter_y = [e for e in range(low_y, 8-n2)]
+        iter_x = [z for z in range(low_x, 8-n2)]
         diag_threats = [Bishop, Pawn, Queen]
         for i, j in zip(iter_y, iter_x):
             if type(board[i][j]) in diag_threats and \
@@ -681,11 +688,11 @@ class King(Piece):
                 if self.current_pos in target:
                     return True
         # Lower left diagonal.
-        n = (7 - y) if (7 - y) < x else x
+        n = (7 - y) if (7-y) < x else x
         high_y = y + n
-        high_x = x - n
-        iter_y = [e for e in range(high_y, 0, -1)]
-        iter_x = [z for z in range(high_x, 8)]
+        low_x = x - n
+        iter_y = [e for e in range(high_y, low_x-1, -1)]
+        iter_x = [z for z in range(low_x, high_y+1)]
         for i, j in zip(iter_y, iter_x):
             if type(board[i][j]) in diag_threats and \
                not board[i][j].color == self.color:
@@ -703,7 +710,7 @@ class King(Piece):
         board: list
             chess board.
         """
-        danger  = [self.diagonal_check(board), self.vertical_horizontal_check(board), self.knight_check(board)]
+        danger = [self.diagonal_check(board), self.vertical_horizontal_check(board), self.knight_check(board)]
         # (b means bool, as every element of danger is a boolean value)
         for b in danger:
             if b:
