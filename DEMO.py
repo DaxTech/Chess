@@ -2,6 +2,7 @@
 
 import pygame
 from pieces import *
+from ai import *
 
 
 class Game:
@@ -76,7 +77,7 @@ class Game:
                     counts += 1
         if counts == 2:
             return True
-        
+
         for i in range(8):
             for j in range(8):
                 if type(self.board[i][j]) == King and self.board[i][j].color == turn:
@@ -153,9 +154,6 @@ class Game:
         y, x = coordinates[0] // 80, coordinates[1] // 80
         return y, x
 
-
-
-
 pygame.init()
 window = pygame.display.set_mode((640, 640))
 window.fill((255, 255, 255))
@@ -166,7 +164,9 @@ running = True
 selected = None
 white_turn = True
 src, dsn = None, None
+KING = test.board[0][4]
 while running:
+    KING.check(test.board)
     test.draw_cells()
     test.pawns(white_turn)
     if test.checkmate():
@@ -175,6 +175,11 @@ while running:
         running = False
     if selected is None:
         dsn, src = None, None
+    if not white_turn:
+        r = alpha_beta_max(test.board, depth=2)
+        ty, tx = r[0]
+        r[1].move(test.board, (ty, tx))
+        white_turn = True
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
