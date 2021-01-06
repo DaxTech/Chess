@@ -166,7 +166,6 @@ white_turn = True
 src, dsn = None, None
 KING = test.board[0][4]
 while running:
-    KING.check(test.board)
     test.draw_cells()
     test.pawns(white_turn)
     if test.checkmate():
@@ -176,7 +175,7 @@ while running:
     if selected is None:
         dsn, src = None, None
     if not white_turn:
-        r = alpha_beta_max(test.board, depth=2)
+        r = alpha_beta_max(test.board, depth=1)
         ty, tx = r[0]
         r[1].move(test.board, (ty, tx))
         white_turn = True
