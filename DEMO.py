@@ -2,7 +2,7 @@
 
 import pygame
 from pieces import *
-from ai import *
+from ai2 import *
 
 
 class Game:
@@ -143,7 +143,7 @@ class Game:
                     #         self.screen.blit(piece, (x1, y1))
                     #         pygame.display.flip()
                     # else:
-                    self.screen.blit(piece, (y, x))
+                    self.screen.blit(piece, (y+10, x+10))
                     pygame.display.flip()
         pygame.display.flip()
 
@@ -164,7 +164,7 @@ running = True
 selected = None
 white_turn = True
 src, dsn = None, None
-KING = test.board[0][4]
+
 while running:
     test.draw_cells()
     test.pawns(white_turn)
@@ -175,10 +175,15 @@ while running:
     if selected is None:
         dsn, src = None, None
     if not white_turn:
-        r = alpha_beta_max(test.board, depth=1)
+        r = alpha_beta_max(test.board, depth=2)
         ty, tx = r[0]
         r[1].move(test.board, (ty, tx))
         white_turn = True
+    # else:
+    #     r = alpha_beta_min(test.board, depth=1)
+    #     ty, tx = r[0]
+    #     r[1].move(test.board, (ty, tx))
+    #     white_turn = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
