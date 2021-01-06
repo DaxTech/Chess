@@ -63,7 +63,7 @@ def doubled_pawns(board, piece):
 def heuristic(board, turn):
     """Returns value of the board."""
     if checkmate(board):
-        return float('-inf') if turn else float('inf')
+        return float('-inf') if not turn else float('inf')
     if stalemate(board, turn):
         return 0
 
@@ -96,7 +96,7 @@ def heuristic(board, turn):
     return calculate_results(w, b, turn)
 
 def calculate_results(w_dict, b_dict, turn):
-    n = 1 if turn else -1
+    n = -1 if not turn else 1
     keys = ['K','Q','R','B','N','P','S','D','M']
     keys2 = [200, 9, 5, 3, 3, 1, -0.5, -0.5, 0.1]
     result = 0
@@ -130,7 +130,6 @@ def transition(board, piece, cur_pos, action):
     board[y][x] = piece
     board[cur_y][cur_x] = temp
     piece.current_pos = action
-    return board
 
 
 def go_back(board, piece, cur_pos, action):
@@ -146,37 +145,46 @@ def go_back(board, piece, cur_pos, action):
     piece.current_pos = cur_pos
 
 
-def alpha_beta_max(board, depth, alpha=float('-inf'), beta=float('inf'), turn=False):
-    depth -= 1
+def alpha_beta_max(board, depth, alpha=(None, None, float('-inf')),
+                  beta=(None, None, float('inf')), turn=False):
+    res = None
     if depth == 0 or terminal_state(board, turn):
         return None, None, heuristic(board, turn)
     for piece in get_pieces(board):
         for move in piece.available_moves(board):
             position = piece.current_pos
-            v2 = alpha_beta_min(transition(board,piece, position, move), depth, alpha, beta)[2]
-            go_back(board, piece, position, move)
-            if v2 >= beta:
-                return None, None, beta
-            if v2 > alpha:
-                alpha = v2
-                res = move, piece, alpha
+            transition(board,piece, position, move)  # making move.
+            v2 = alpha_beta_min(board, depth - 1, alpha=alpha, beta=beta)[2]
+            go_back(board, piece, position, move)  # unmaking move.
+            if v2 >= beta[2]:  # min already has a better move than this one.
+                beta = move, piece, beta[2]
+            if v2 > alpha[2]:  # this is the best max can do.
+                alpha = move, piece, v2
+                res = alpha
+    if not res:
+        return alpha
     return res
 
 
-def alpha_beta_min(board, depth, alpha=float('-inf'), beta=float('inf'), turn=True):
-    depth -= 1
+def alpha_beta_min(board, depth, alpha=(None, None, float('-inf')),
+                   beta=(None, None, float('inf')), turn=True):
+    res = None
     if depth == 0 or terminal_state(board, turn):
         return None, None, heuristic(board, turn)
     for piece in get_pieces(board, color='white'):
         for move in piece.available_moves(board):
             position = piece.current_pos
-            v2 = alpha_beta_min(transition(board, piece, position, move), depth, alpha, beta)[2]
+            transition(board, piece, position, move)
+            v2 = alpha_beta_min(board, depth - 1, alpha=alpha, beta=beta)[2]
             go_back(board, piece, position, move)
-            if v2 <= alpha:
-                return None, None, alpha
-            if v2 < beta:
-                beta = v2
-                res = move, piece, beta
+            if v2 <= alpha[2]:  # max already has a better move than this one.
+                alpha = move, piece, alpha[2]
+                return alpha
+            if v2 < beta[2]:
+                beta = move, piece, v2
+                res = beta
+    if not res:
+        return beta
     return res
 
 def format_board():
@@ -205,12 +213,15 @@ def format_board():
     return board
 
 # test = format_board()
-# test = transition(test, test[1][0], (1, 0), (3, 0))
-# go_back(test, test[3][0], (1, 0), (3, 0))
+# test[1][4].move(test, (3, 4))
+# test[0][5].move(test, (1, 4))
+# test[0][6].move(test, (2, 5))
+# transition(test, test[0][4], (0, 4), (0, 6))
+# #go_back(test, test[0][6], (0, 4), (0, 6))
 # for i in range(8):
 #     for j in range(8):
 #         if not type(test[i][j]) == int:
-#             print(test[i][j].score, end='|')
+#             print(test[i][j].score,'|', end = '')
 #         else:
-#             print(test[i][j], end='|')
+#             print(test[i][j],'|', end = '')
 #     print()
