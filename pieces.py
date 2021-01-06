@@ -364,7 +364,7 @@ class Knight(Piece):
         c2 = self.will_check(board, coordinates)
         c3 = self.trajectory(board, coordinates)
         c4 = self.same_color(board, coordinates)
-        if not c2 and c1 and c3:
+        if not c2 and c1 and c3 and not c4:
             return True
         if c1 or c2 or not c3 or c4:
             return False
