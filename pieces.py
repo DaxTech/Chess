@@ -555,7 +555,8 @@ class King(Piece):
         c2 = self.trajectory(board, coordinates)
         c3 = self.is_blocked(board, coordinates)
         c4 = self.same_color(board, coordinates)
-        if self.can_castle(board, coordinates):
+        c5 = self.check(board)
+        if self.can_castle(board, coordinates) and not c1 and not c5:
             return True
         if c1 or not c2 or c3 or c4:
             return False
@@ -601,10 +602,20 @@ class King(Piece):
         if not type(board[y][n]) == Rook or board[y][n].moved:
             return False
         # Checking for pieces blocking the way or checks.
-        for i in range(1, 3):
-            e = cur_x + i * m
-            if not type(board[y][e]) == int or self.will_check(board, (y, e)):
-                return False
+        if x == 6:
+            for i in range(1, 3):
+                e = cur_x + i * m
+                if not type(board[y][e]) == int or self.will_check(board, (y, e)):
+                    return False
+        else:
+            for i in range(1, 4):
+                e = cur_x + i * m
+                if i == 3:
+                    if not type(board[y][e]) == int:
+                        return False
+                    continue
+                if not type(board[y][e]) == int or self.will_check(board, (y, e)):
+                    return False
         return True
 
     def knight_check(self, board: list):
