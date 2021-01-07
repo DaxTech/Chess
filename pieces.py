@@ -658,7 +658,7 @@ class King(Piece):
         """
         y, x = self.current_pos
         # Going through vertical/horizontal lines.
-        straight_threats = [Rook, Queen]
+        straight_threats = [Rook, Queen, King]
         for i in range(8):
             # Horizontal check.
             if type(board[y][i]) in straight_threats and \
@@ -691,7 +691,7 @@ class King(Piece):
         n2 = low_y if low_y < low_x else low_x
         iter_y = [e for e in range(low_y, 8-n2)]
         iter_x = [z for z in range(low_x, 8-n2)]
-        diag_threats = [Bishop, Pawn, Queen]
+        diag_threats = [Bishop, Pawn, Queen, King]
         for i, j in zip(iter_y, iter_x):
             if type(board[i][j]) in diag_threats and \
                not board[i][j].color == self.color:
