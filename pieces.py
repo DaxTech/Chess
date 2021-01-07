@@ -504,7 +504,7 @@ class Pawn(Piece):
         n = 4 if self.view == 1 else 3
         if not cur_y == n:
             return False
-        if not y == n + self.view and not abs(cur_x - x) == 1:
+        if not y == (n + self.view) or not abs(cur_x - x) == 1:
             return False
         if not type(board[n][x]) == Pawn:
             return False
