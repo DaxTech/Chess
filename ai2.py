@@ -4,11 +4,12 @@
 from pieces import *
 
 
-def checkmate(board):
+def checkmate(board, turn):
     """Returns True if current state of the board is checkmate, False otherwise."""
+    color = 'white' if turn else 'black'
     for i in range(8):
         for j in range(8):
-            if type(board[i][j]) == King:
+            if type(board[i][j]) == King and board[i][j].color == color:
                 king = board[i][j]
                 if king.check(board) and not king.available_moves(board):
                     team = king.get_team_pieces(board)
@@ -25,7 +26,7 @@ def checkmate(board):
 
 def stalemate(board, turn):
     """Returns True if the current state is a draw, False otherwise."""
-    color = 'black' if turn else 'white'
+    color = 'white' if turn else 'black'
     counts = 0
     for i in range(8):
         for j in range(8):
@@ -67,7 +68,7 @@ def doubled_pawns(board, piece):
 
 def evaluate(board, turn):
     """Returns value of the board."""
-    if checkmate(board):
+    if checkmate(board, turn):
         # turn white, and checkmate means black won, turn black, the other way around.
         return float('inf') if turn else float('-inf')
     if stalemate(board, turn):
@@ -103,8 +104,8 @@ def evaluate(board, turn):
 
 def calculate_results(w_dict, b_dict, turn):
     """Calculates the value of the board, considering the given features."""
-    n = -1 if turn else 1 # turn=True for white, turn=False for black.
-    keys = ['K','Q','R','B','N','P','S','D','M']
+    n = -1 if turn else 1  # turn=True for white, turn=False for black.
+    keys = ['K', 'Q', 'R', 'B', 'N', 'P', 'S', 'D', 'M']
     keys2 = [200, 9, 5, 3, 3, 1, -0.5, -0.5, 0.1]
     result = 0
     for k, k2 in zip(keys, keys2):
@@ -134,9 +135,10 @@ def castling(piece, cur_pos, action):
         return True
     return False
 
+
 def transition(board, piece, cur_pos, action):
     """Makes temporal move to the board"""
-    LAST_TAKEN = None
+    last_taken = None
     y, x = action  # move to
     cur_y, cur_x = cur_pos  # move from
     if castling(piece, cur_pos, action):
@@ -159,11 +161,12 @@ def transition(board, piece, cur_pos, action):
             board[y][3] = temp
     else:
         if not type(board[y][x]) == int:
-            LAST_TAKEN = board[y][x]
+            last_taken = board[y][x]
         board[y][x] = piece
         board[cur_y][cur_x] = 0 if (cur_y+cur_x) % 2 == 0 else -1
         piece.current_pos = action
-    return LAST_TAKEN
+    return last_taken
+
 
 def go_back(board, piece, cur_pos, action, bucket=None):
     """Returns board to its original state after temporal transition"""
@@ -177,10 +180,10 @@ def go_back(board, piece, cur_pos, action, bucket=None):
             # Moving the rook back
             temp = board[y][5]
             temp.current_pos = (y, 7)
-            board[y][5] =  0 if (y+5) % 2 == 0 else -1
+            board[y][5] = 0 if (y+5) % 2 == 0 else -1
             board[y][7] = temp
         else:  # cur_x == 2, from long castle
-            board[y][x] = piece # y and x are always either 0, 4 or 7, 4
+            board[y][x] = piece  # y and x are always either 0, 4 or 7, 4
             piece.current_pos = action
             # Moving the Rook
             temp = board[y][3]
@@ -198,7 +201,7 @@ def go_back(board, piece, cur_pos, action, bucket=None):
 
 
 def alpha_beta_max(board, depth, alpha=(None, None, float('-inf')),
-                  beta=(None, None, float('inf')), turn=False):
+                   beta=(None, None, float('inf')), turn=False):
     res = None
     if depth == 0 or terminal_state(board, turn):
         return None, None, evaluate(board, turn)
