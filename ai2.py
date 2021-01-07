@@ -51,7 +51,7 @@ def stalemate(board, turn):
 
 def terminal_state(board, turn):
     """Returns True if the current state is checkmate or stalemate."""
-    return checkmate(board) or stalemate(board, turn)
+    return checkmate(board, turn) or stalemate(board, turn)
 
 
 def doubled_pawns(board, piece):
