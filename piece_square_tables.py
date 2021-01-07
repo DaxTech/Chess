@@ -78,3 +78,16 @@ WHITE_KING_END = [[-50,-40,-30,-20,-20,-30,-40,-50],
                [-30,-10, 20, 30, 30, 20,-10,-30],
                [-30,-30,  0,  0,  0,  0,-30,-30],
                [-50,-30,-30,-30,-30,-30,-30,-50]]
+
+PIECE_TABLES = {"white_P": WHITE_PAWNS,
+                "black_P": BLACK_PAWNS,
+                "white_N": WHITE_KNIGHTS,
+                "black_N": BLACK_KNIGHTS,
+                "white_B": WHITE_BISHOPS,
+                "black_B": BLACK_BISHOPS,
+                "white_R": WHITE_ROOKS,
+                "black_R": BLACK_ROOKS,
+                "white_Q": WHITE_QUEEN,
+                "black_Q": BLACK_QUEEN,
+                "white_K": WHITE_KING_MID,
+                "black_K": BLACK_KING_MID}
