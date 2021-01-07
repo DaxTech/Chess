@@ -239,7 +239,7 @@ class Queen(Piece):
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
         self.letter = 'Q'
-        self.score = 9  # num value of the queen.
+        self.score = 900  # num value of the queen.
         self.image = PATH+color[0]+'Queen.png'
 
     def trajectory(self, board: list, coordinates: tuple):
@@ -287,7 +287,7 @@ class Rook(Piece):
     def __init__(self, color: str, current_pos=None, moved=False):
         super().__init__(color, current_pos)
         self.letter = 'R'
-        self.score = 5  # num value of the rook
+        self.score = 500  # num value of the rook
         self.moved = moved
         self.image = PATH + color[0] + 'Rook.png'
 
@@ -322,7 +322,7 @@ class Bishop(Piece):
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
         self.letter = 'B'
-        self.score = 3.5  # num value of the bishop.
+        self.score = 330  # num value of the bishop.
         self.image = PATH + color[0] + 'Bishop.png'
 
     def trajectory(self, board: list, coordinates: tuple):
@@ -354,7 +354,7 @@ class Knight(Piece):
     def __init__(self, color: str, current_pos=None):
         super().__init__(color, current_pos)
         self.letter = 'N'
-        self.score = 3  # num value of the knight
+        self.score = 320  # num value of the knight
         self.image = PATH + color[0] + 'Knight.png'
 
     def validate_move(self, board: list, coordinates: tuple):
@@ -390,7 +390,7 @@ class Pawn(Piece):
                  view=1, just_moved=False):
         super().__init__(color, current_pos)
         self.letter = 'P'
-        self.score = 1  # num value of the pawn
+        self.score = 100  # num value of the pawn
         self.first_move = first_move
         self.view = view
         self.just_moved = just_moved
@@ -528,7 +528,7 @@ class King(Piece):
     def __init__(self, color: str, current_pos=None, moved=False):
         super().__init__(color, current_pos)
         self.letter = 'K'
-        self.score = 10  # num value of the king
+        self.score = 20000  # num value of the king
         self.moved = moved
         self.image = PATH + color[0] + 'King.png'
 
