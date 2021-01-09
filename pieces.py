@@ -119,6 +119,8 @@ class Piece:
         moves = []
         for i in range(8):
             for j in range(8):
+                if not self.trajectory(board, (i, j)):
+                    continue
                 if self.validate_move(board, (i, j)) and not (i, j) == self.current_pos:
                     moves.append((i, j))
         return moves
@@ -420,6 +422,25 @@ class Pawn(Piece):
         self.just_moved = False
         return True
 
+    def available_moves(self, board: list):
+        """
+        Returns list of available valid movements for a given piece.
+
+        Parameters
+        ----------
+        board: list
+            chess board.
+        """
+        moves = []
+        for i in range(8):
+            for j in range(8):
+                if not (self.trajectory(board, (i, j)) or self.en_passant(board, (i, j)) \
+                   or self.exc(board, (i, j))):
+                    continue
+                if self.validate_move(board, (i, j)) and not (i, j) == self.current_pos:
+                    moves.append((i, j))
+        return moves
+
     def validate_move(self, board: list, coordinates: tuple):
         a = self.exc(board, coordinates)
         c1 = self.is_check(board)
@@ -643,7 +664,7 @@ class King(Piece):
                 final_moves.append(m)
         for y_pos, x_pos in final_moves:
             if type(board[y_pos][x_pos]) == Knight and \
-                not board[y_pos][x_pos].color == self.color:
+               not board[y_pos][x_pos].color == self.color:
                 return True
         return False
 
