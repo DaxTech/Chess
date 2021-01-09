@@ -170,8 +170,10 @@ while running:
     test.pawns(white_turn)
     if test.checkmate():
         running = False
+        continue
     if test.stalemate(white_turn):
         running = False
+        continue
     if selected is None:
         dsn, src = None, None
     if not white_turn:
