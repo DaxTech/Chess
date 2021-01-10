@@ -61,7 +61,7 @@ class Game:
                         if king.color == 'white':
                             text = font.render('BLACK WON', 1, (0, 0, 0))
                         else:
-                            text = font.render('WHITE WON', 1, (0, 0, 255))
+                            text = font.render('WHITE WON', 1, (255, 255, 255))
                         if counts == len(team):
                             self.screen.blit(text, (200, 200))
                             pygame.display.flip()
@@ -177,15 +177,15 @@ while running:
     if selected is None:
         dsn, src = None, None
     if not white_turn:
-        r = alpha_beta_max(test.board, depth=2)
-        ty, tx = r[0]
-        r[1].move(test.board, (ty, tx))
+        r = alpha_beta(test.board, depth=2, turn=False, alpha=(None, None, float('-inf')), beta=(None, None, float('inf')))
+        ty, tx = r[1]
+        r[0].move(test.board, (ty, tx))
         white_turn = True
-    # else:
-    #     r = alpha_beta_min(test.board, depth=1)
-    #     ty, tx = r[0]
-    #     r[1].move(test.board, (ty, tx))
-    #     white_turn = False
+    else:
+        r = alpha_beta(test.board, depth=2, turn=True, alpha=(None, None, float('-inf')), beta=(None, None, float('inf')))
+        ty, tx = r[1]
+        r[0].move(test.board, (ty, tx))
+        white_turn = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
