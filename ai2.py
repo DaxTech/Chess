@@ -3,7 +3,6 @@
 
 from pieces import *
 from piece_square_tables import *
-import time
 
 
 def checkmate(board, turn):
@@ -112,13 +111,12 @@ def calculate_results(w_dict, b_dict, turn):
     """Calculates the value of the board, considering the given features."""
     n = -1 if turn else 1  # turn=True for white, turn=False for black.
     keys = ['K', 'Q', 'R', 'B', 'N', 'P', 'S', 'D', 'M']
-    keys2 = [1, 1, 1, 1, 1, 1, -5, -5, 1.5]
+    keys2 = [1, 1, 1, 1, 1, 1, -5, -5, 1]
     result = 0
     for k, k2 in zip(keys, keys2):
         if turn:
             result += (w_dict.get(k, 0) - b_dict.get(k, 0)) * k2
         else:
-            print(k, b_dict.get(k, 0), '-', w_dict.get(k, 0))
             result += (b_dict.get(k, 0) - w_dict.get(k, 0)) * k2
     return result * n
 
@@ -307,22 +305,3 @@ def format_board():
             board[7][i] = King('white', current_pos=(7, i))
 
     return board
-
-
-# test[0][1].move(test, (2, 2))
-# test[6][3].move(test, (4, 3))
-# test[0][6].move(test, (2, 5))
-# test[4][4].move(test, (3, 4))
-# test[2][5].move(test, (3, 3))
-# test[7][6].move(test, (5, 5))
-# test[1][4].move(test, (2, 4))
-# test[7][5].move(test, (4, 2))
-#
-# print(alpha_beta_max(test, depth=4))
-# for i in range(8):
-#     for j in range(8):
-#         if not type(test[i][j]) == int:
-#             print(test[i][j].score, end='|')
-#         else:
-#             print(00.0, end='|')
-#     print()
