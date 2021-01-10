@@ -2,6 +2,8 @@
 
 
 from pieces import *
+from piece_square_tables import *
+import time
 
 
 def checkmate(board, turn):
@@ -76,13 +78,12 @@ def evaluate(board, turn):
     # M: mobility (amount of available moves), D: doubled pawns, S: blocked pawns
     w = {'M': 0, 'D': 0, 'S': 0}  # w = white
     b = {'M': 0, 'D': 0, 'S': 0}  # b = black
-
     for i in range(8):
         for j in range(8):
             if not type(board[i][j]) == int:
                 p = board[i][j]  # p means piece
                 if p.color == 'white':
-                    w[p.letter] = w.get(p.letter, 0) + 1
+                    w[p.letter] = w.get(p.letter, 0) + piece_value(p)
                     if type(p) == Pawn:
                         if doubled_pawns(board, p):
                             w['D'] += 1
@@ -91,7 +92,7 @@ def evaluate(board, turn):
                             continue
                     w['M'] += len(p.available_moves(board))
                 else:
-                    b[p.letter] = b.get(p.letter, 0) + 1
+                    b[p.letter] = b.get(p.letter, 0) + piece_value(p)
                     if type(p) == Pawn:
                         if doubled_pawns(board, p):
                             b['D'] += 1
@@ -102,16 +103,22 @@ def evaluate(board, turn):
     return calculate_results(w, b, turn)
 
 
+def piece_value(piece):
+    y, x = piece.current_pos
+    return piece.score + PIECE_TABLES[piece.color+'_'+piece.letter][y][x]
+
+
 def calculate_results(w_dict, b_dict, turn):
     """Calculates the value of the board, considering the given features."""
     n = -1 if turn else 1  # turn=True for white, turn=False for black.
     keys = ['K', 'Q', 'R', 'B', 'N', 'P', 'S', 'D', 'M']
-    keys2 = [200, 9, 5, 3, 3, 1, -0.5, -0.5, 0.1]
+    keys2 = [1, 1, 1, 1, 1, 1, -5, -5, 1.5]
     result = 0
     for k, k2 in zip(keys, keys2):
         if turn:
             result += (w_dict.get(k, 0) - b_dict.get(k, 0)) * k2
         else:
+            print(k, b_dict.get(k, 0), '-', w_dict.get(k, 0))
             result += (b_dict.get(k, 0) - w_dict.get(k, 0)) * k2
     return result * n
 
@@ -194,7 +201,6 @@ def go_back(board, piece, cur_pos, action, bucket=None):
         board[y][x] = piece
         if bucket is not None:
             board[cur_y][cur_x] = bucket
-            bucket = None
         else:
             board[cur_y][cur_x] = 0 if (cur_y+cur_x) % 2 == 0 else -1
         piece.current_pos = action
@@ -202,42 +208,79 @@ def go_back(board, piece, cur_pos, action, bucket=None):
 
 def alpha_beta_max(board, depth, alpha=(None, None, float('-inf')),
                    beta=(None, None, float('inf')), turn=False):
-    res = None
     if depth == 0 or terminal_state(board, turn):
         return None, None, evaluate(board, turn)
     for piece in get_pieces(board):
         for move in piece.available_moves(board):
             position = piece.current_pos
             bucket = transition(board,piece, position, move)  # making move.
-            v2 = alpha_beta_min(board, depth - 1, alpha=alpha, beta=beta)[2]
+            v = alpha_beta_min(board, depth - 1, alpha=alpha, beta=beta)[2]
             go_back(board, piece, move, position, bucket=bucket)  # unmaking move.
-            if v2 >= beta[2]:  # min already has a better move than this one.
-                beta = move, piece, beta[2]
+            if v >= beta[2]:  # min already has a better move than this one.
                 return beta
-            if v2 > alpha[2]:  # this is the best max can do.
-                alpha = move, piece, v2
+            if v > alpha[2]:  # this is the best max can do.
+                alpha = move, piece, v
                 res = alpha
     return res
 
 
 def alpha_beta_min(board, depth, alpha=(None, None, float('-inf')),
                    beta=(None, None, float('inf')), turn=True):
-    res = None
     if depth == 0 or terminal_state(board, turn):
         return None, None, evaluate(board, turn)
     for piece in get_pieces(board, color='white'):
         for move in piece.available_moves(board):
             position = piece.current_pos
             bucket = transition(board, piece, position, move)
-            v2 = alpha_beta_max(board, depth - 1, alpha=alpha, beta=beta)[2]
+            v = alpha_beta_max(board, depth - 1, alpha=alpha, beta=beta)[2]
             go_back(board, piece, move, position, bucket=bucket)
-            if v2 <= alpha[2]:  # max already has a better move than this one.
-                alpha = move, piece, alpha[2]
+            if v <= alpha[2]:  # max already has a better move than this one.
                 return alpha
-            if v2 < beta[2]:
-                beta = move, piece, v2
+            if v < beta[2]:
+                beta = move, piece, v
                 res = beta
     return res
+
+
+def alpha_beta(board, depth, turn, alpha, beta):
+    if depth == 0 or terminal_state(board, turn):
+        return None, None, evaluate(board, turn)
+    cut_off = False
+    if turn:
+        best_res = None, None, float('inf')
+        for piece in get_pieces(board, color='white'):
+            if cut_off: break
+            for move in piece.available_moves(board):
+                pos = piece.current_pos
+                bucket = transition(board, piece, pos, move)
+                v = alpha_beta(board, depth-1, False, alpha, beta)[2]
+                go_back(board, piece, move, pos, bucket=bucket)
+                if v <= best_res[2]:
+                    best_res = piece, move, v
+                if best_res[2] <= beta[2]:
+                    beta = best_res
+                if beta[2] <= alpha[2]:
+                    cut_off = True
+                    break
+        return best_res
+    else:
+        best_res = None, None, float('-inf')
+        for piece in get_pieces(board):
+            if cut_off:
+                break
+            for move in piece.available_moves(board):
+                pos = piece.current_pos
+                bucket = transition(board, piece, pos, move)
+                v = alpha_beta(board, depth-1, True, alpha, beta)[2]
+                go_back(board, piece, move, pos, bucket=bucket)
+                if v >= best_res[2]:
+                    best_res = piece, move, v
+                if best_res[2] >= alpha[2]:
+                    alpha = best_res
+                if beta[2] <= alpha[2]:
+                    cut_off = True
+                    break
+        return best_res
 
 
 def format_board():
@@ -264,3 +307,22 @@ def format_board():
             board[7][i] = King('white', current_pos=(7, i))
 
     return board
+
+
+# test[0][1].move(test, (2, 2))
+# test[6][3].move(test, (4, 3))
+# test[0][6].move(test, (2, 5))
+# test[4][4].move(test, (3, 4))
+# test[2][5].move(test, (3, 3))
+# test[7][6].move(test, (5, 5))
+# test[1][4].move(test, (2, 4))
+# test[7][5].move(test, (4, 2))
+#
+# print(alpha_beta_max(test, depth=4))
+# for i in range(8):
+#     for j in range(8):
+#         if not type(test[i][j]) == int:
+#             print(test[i][j].score, end='|')
+#         else:
+#             print(00.0, end='|')
+#     print()
