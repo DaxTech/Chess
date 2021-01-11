@@ -2,9 +2,9 @@
 
 import pygame
 from pieces import *
-from ai2 import *
+from AI import *
 
-
+BLACK = (0, 0, 0)
 class Game:
 
     def __init__(self, screen):
@@ -13,7 +13,6 @@ class Game:
 
     @staticmethod
     def format_board():
-        # REDO - LET THE PIECES BE SETTLED ON A FOR LOOP, WE DON'T CARE ABOUT CREATING VARIABLES FOR THEM.
         board = [[0 if (z+e) % 2 == 0 else -1 for z in range(8)] for e in range(8)]
         for i in range(8):
             board[1][i] = Pawn('black', current_pos=(1, i))
@@ -37,19 +36,20 @@ class Game:
 
         return board
 
-    def checkmate(self):
+    def checkmate(self, turn):
+        color = 'white' if turn else 'black'
         for i in range(8):
             for j in range(8):
-                if type(self.board[i][j]) == King:
+                if type(self.board[i][j]) == King and self.board[i][j].color == color:
                     king = self.board[i][j]
                     if king.check(self.board) and not king.available_moves(self.board):
                         team = king.get_team_pieces(self.board)
                         if not team:
                             font = pygame.font.SysFont('comicsans', 80, True)
                             if king.color == 'white':
-                                text = font.render('BLACK WON', 1, (0, 0, 0))
+                                text = font.render('BLACK WON', 1, BLACK)
                             else:
-                                text = font.render('WHITE WON', 1, (0, 0, 255))
+                                text = font.render('WHITE WON', 1, BLACK)
                             self.screen.blit(text, (200, 200))
                             pygame.display.flip()
                             return True
@@ -59,17 +59,17 @@ class Game:
                                 counts += 1
                                 font = pygame.font.SysFont('comicsans', 80, True)
                         if king.color == 'white':
-                            text = font.render('BLACK WON', 1, (0, 0, 0))
+                            text = font.render('BLACK WON', 1, BLACK)
                         else:
-                            text = font.render('WHITE WON', 1, (255, 255, 255))
+                            text = font.render('WHITE WON', 1, BLACK)
                         if counts == len(team):
                             self.screen.blit(text, (200, 200))
                             pygame.display.flip()
                             return True
-        return False
+                    return False
 
     def stalemate(self, turn):
-        turn = 'white' if turn else 'black'
+        color = 'white' if turn else 'black'
         counts = 0
         for i in range(8):
             for j in range(8):
@@ -80,7 +80,7 @@ class Game:
 
         for i in range(8):
             for j in range(8):
-                if type(self.board[i][j]) == King and self.board[i][j].color == turn:
+                if type(self.board[i][j]) == King and self.board[i][j].color == color:
                     king = self.board[i][j]
                     if king.check(self.board) or king.available_moves(self.board):
                         return False
@@ -100,121 +100,152 @@ class Game:
             if type(self.board[4][i]) == Pawn and self.board[4][i].color == 'white' and white:
                 self.board[4][i].just_moved = False
 
-    def divide(self):
-        for i in range(80, 640, 80):
-            pygame.draw.line(self.screen, (0, 0, 0), (i, 0), (i, 640))
-            pygame.draw.line(self.screen, (0, 0, 0), (0, i), (640, i))
-        pygame.display.flip()
+    def terminal_condition(self, turn):
+        """Returns True if it's a stalemate or checkmate, i.e. terminal state of the game."""
+        self.pawns(turn)
+        return self.checkmate(turn) or self.stalemate(turn)
 
-    def draw_cells(self):
-        # REVIEW TOMORROW, THE MECHANICS WORK.
-        # FIGURE OUT A WAY OF UPDATING THE BOARD WHILE THE PIECE IS MOVING, WITHOUT
-        # MAKING EVERYTHING SEEM LAGGY AND SHIT LIKE THAT.
+    def draw_cells(self, last_pos, new_pos):
         n = 80
+        y, x = new_pos
+        from_y, from_x = last_pos
         for i in range(8):
             for j in range(8):
-                x = n * i
-                y = n * j
+                cell_x = n * i
+                cell_y = n * j
                 if (i+j) % 2 == 0:
-                    pygame.draw.rect(self.screen, (255, 255, 255), (y, x, 80, 80))
+                    pygame.draw.rect(self.screen, (255, 255, 255), (cell_y, cell_x, 80, 80))
                 else:
-                    pygame.draw.rect(self.screen, (155, 118, 83), (y, x, 80, 80))
+                    pygame.draw.rect(self.screen, (155, 118, 83), (cell_y, cell_x, 80, 80))
+                if not y == 10:
+                    if i == y and j == x:
+                        pygame.draw.rect(self.screen, (201, 174, 51), (x*n, y*n, 80, 80))
+                    if i == from_y and j == from_x:
+                        pygame.draw.rect(self.screen, (201, 174, 51), (from_x*n, from_y*n, 80, 80))
                 if not type(self.board[i][j]) == int:
                     temp = self.board[i][j]
                     piece = pygame.image.load(temp.image)
-                    # if source is not None and destination is not None \
-                    #         and destination == (i, j):
-                    #     y1, x1 = source
-                    #     y2, x2 = destination
-                    #     difference = abs(y1 - y2) * 80 if not y2 == y1 else abs(x1 - x2) * 80
-                    #     nx = -0.1 if x2 < x1 else 0.1
-                    #     ny = -0.1 if y2 < y1 else 0.1
-                    #
-                    #     y1, x1 = y1 * 80, x1 * 80
-                    #     y2, x2 = y2 * 80, x2 * 80
-                    #     self.screen.blit(piece, (x1, y1))
-                    #     pygame.display.flip()
-                    #     for z in range(difference * 10):
-                    #
-                    #         if y1 != y2:
-                    #             y1 += ny
-                    #         if not x1 == x2:
-                    #             x1 += nx
-                    #         self.screen.blit(piece, (x1, y1))
-                    #         pygame.display.flip()
-                    # else:
-                    self.screen.blit(piece, (y+10, x+10))
+                    self.screen.blit(piece, (cell_y+10, cell_x+10))
                     pygame.display.flip()
         pygame.display.flip()
-
-
 
     @staticmethod
     def get_pos(coordinates):
         y, x = coordinates[0] // 80, coordinates[1] // 80
         return y, x
 
-pygame.init()
-window = pygame.display.set_mode((640, 640))
-window.fill((255, 255, 255))
-test = Game(window)
-pygame.display.set_caption('Chess')
+    def divide_cells(self):
+        for i in range(8):
+            pygame.draw.line(self.screen, BLACK, (0, i*80), (640, i*80), width=1)
+            pygame.draw.line(self.screen, BLACK, (i * 80, 0), (i * 80, 640), width=1)
+            pygame.display.flip()
 
-running = True
-selected = None
-white_turn = True
-src, dsn = None, None
+    def draw_helper(self):
+        # Coordinates for all drawings, text and images have been done by eyesight, there are no calculations behind it.
+        self.screen.fill((200, 200, 0))
+        # Defining text fonts:
+        font = pygame.font.SysFont('comicsans', 60)
+        font2 = pygame.font.SysFont('caveat', 60, True)
+        # Loading main menu images.
+        board_img = pygame.image.load('.\\board-games.png')
+        board_img2 = pygame.image.load('.\\board-games2.png')
+        cobra = pygame.image.load('.\\cobra.png')
+        # Rendering text.
+        game_name = font2.render('Python Chess with pygame', 1, BLACK)
+        text = font.render('SELECT GAME MODE:', 1, BLACK)
+        text2 = font.render('Player vs Player', 1, (110, 44, 0))
+        text3 = font.render('Player vs AI', 1, (110, 44, 0))
+        # Drawing some outlines to emulate "buttons".
+        pygame.draw.rect(self.screen, BLACK, (45, 280, 555, 280), width=3)
+        pygame.draw.rect(self.screen, BLACK, (125, 390, 370, 70), width=3)
+        pygame.draw.rect(self.screen, BLACK, (175, 480, 285, 70), width=3)
+        # Printing everything on screen.
+        self.screen.blit(text, (95, 300))
+        self.screen.blit(text2, (145, 400))
+        self.screen.blit(text3, (195, 500))
+        self.screen.blit(game_name, (45, 20))
+        self.screen.blit(board_img, (65, 100))
+        self.screen.blit(board_img2, (427, 100))
+        self.screen.blit(cobra, (255, 100))
+        pygame.display.flip()
 
-while running:
-    test.draw_cells()
-    test.pawns(white_turn)
-    if test.checkmate():
-        running = False
-        continue
-    if test.stalemate(white_turn):
-        running = False
-        continue
-    if selected is None:
-        dsn, src = None, None
-    if not white_turn:
-        r = alpha_beta(test.board, depth=2, turn=False, alpha=(None, None, float('-inf')), beta=(None, None, float('inf')))
-        ty, tx = r[1]
-        r[0].move(test.board, (ty, tx))
+    @staticmethod
+    def select_helper(position):
+        against_player = [(j, i) for i in range(390, 390+71) for j in range(125, 125+371)]
+        against_ai = [(j, i) for i in range(480, 480+71) for j in range(175, 175+286)]
+        if position in against_player:
+            return 1
+        elif position in against_ai:
+            return -1
+        else:
+            return 0
+
+    def main_menu(self):
+        choosing = True
+        self.draw_helper()  # no need to draw it at every iteration.
+        while choosing:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    choosing = False
+                    exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos = event.pos
+                    selection = self.select_helper(pos)
+                    if not selection == 0:
+                        choosing = False
+                        return selection
+
+    def main_loop(self):
+        running = True
+        ai_active = self.main_menu()
+        selected = None
         white_turn = True
-    else:
-        r = alpha_beta(test.board, depth=2, turn=True, alpha=(None, None, float('-inf')), beta=(None, None, float('inf')))
-        ty, tx = r[1]
-        r[0].move(test.board, (ty, tx))
-        white_turn = False
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if selected is None:
-                cur_x, cur_y = event.pos
-                pos_y, pos_x = test.get_pos((cur_y, cur_x))
-                if type(test.board[pos_y][pos_x]) == int:
-                    continue
-                if (test.board[pos_y][pos_x].color == 'black' and white_turn)\
-                   or (test.board[pos_y][pos_x].color == 'white' and not white_turn):
-                    continue
-
-                selected = test.board[pos_y][pos_x]
-            else:
-                cur_x, cur_y = event.pos
-                pos_y, pos_x = test.get_pos((cur_y, cur_x))
-                src = selected.current_pos
-                if selected.move(test.board, (pos_y, pos_x)):
-                    dsn = (pos_y, pos_x)
-                    if white_turn:
-                        white_turn = False
-                    else:
-                        white_turn = True
-                selected = None
+        src = (10, 10)
+        dsn = (10, 10)
+        while running:
+            self.draw_cells(src, dsn)
+            if self.terminal_condition(white_turn):
+                running = False
                 continue
+            if not white_turn and ai_active == -1:
+                result = alpha_beta(test.board, depth=2, turn=False, alpha=(None, None, float('-inf')),
+                                    beta=(None, None, float('inf')))
+                src = result[0].current_pos
+                dsn = result[1]
+                y, x = result[1]
+                result[0].move(test.board, (y, x))
+                white_turn = True
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+                    continue
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if selected is None:
+                        cur_x, cur_y = event.pos
+                        y, x = self.get_pos((cur_y, cur_x))
+                        if type(self.board[y][x]) == int:
+                            continue
+                        if (self.board[y][x].color == 'black' and white_turn) \
+                                or (self.board[y][x].color == 'white' and not white_turn):
+                            break
+                        selected = test.board[y][x]
+                    else:
+                        cur_x, cur_y = event.pos
+                        y, x = self.get_pos((cur_y, cur_x))
+                        src = selected.current_pos
+                        if selected.move(self.board, (y, x)):
+                            dsn = (y, x)
+                            if white_turn:
+                                white_turn = False
+                            else:
+                                white_turn = True
+                        selected = None
+                        break
 
-
-while not running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = True
+    @staticmethod
+    def end_loop():
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
