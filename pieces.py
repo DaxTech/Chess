@@ -50,9 +50,9 @@ class Piece:
         Parameters
         ----------
         color: str
-            color of the piece
+            Color of the piece
         current_pos: tuple
-            current position of the piece (default None).
+            Current position of the piece (default None).
         """
         self.color = color
         self.current_pos = current_pos
@@ -65,11 +65,11 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         forced: bool
-            movement is forced by another piece like in castling (default False).
+            Movement is forced by another piece like in castling (default False).
         """
         cur_y, cur_x = self.current_pos
         y, x = coordinates
@@ -87,9 +87,9 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         """
         # Conditions to make move in order of importance.
         c1 = self.is_check(board)
@@ -114,7 +114,7 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         moves = []
         for i in range(8):
@@ -132,7 +132,7 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         moves = []
         for i in range(8):
@@ -152,9 +152,9 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         """
         pass
 
@@ -167,9 +167,9 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         """
         pass
 
@@ -181,9 +181,9 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         """
         y, x = coordinates
         if not type(board[y][x]) == int:  # means the cell is empty.
@@ -197,7 +197,7 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         for i in range(8):
             for j in range(8):
@@ -212,9 +212,9 @@ class Piece:
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         """
 
         cur_y, cur_x = self.current_pos
@@ -429,7 +429,7 @@ class Pawn(Piece):
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         moves = []
         for i in range(8):
@@ -493,9 +493,9 @@ class Pawn(Piece):
         Parameters
         ----------
          board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         """
         # Taking another piece exception.
         cur_y, cur_x = self.current_pos
@@ -515,9 +515,9 @@ class Pawn(Piece):
         Parameters
         ----------
          board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         """
         # En passant exception
         cur_y, cur_x = self.current_pos
@@ -606,9 +606,9 @@ class King(Piece):
         Parameters
         ----------
          board: list
-            chess board.
+            Chess board.
         coordinates: tuple
-            y, x coordinates, destination cell.
+            Y, x coordinates, destination cell.
         """
         cur_y, cur_x = self.current_pos
         y, x = coordinates
@@ -646,7 +646,7 @@ class King(Piece):
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         y, x = self.current_pos
         # All possible knight moves EVER
@@ -675,7 +675,7 @@ class King(Piece):
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         y, x = self.current_pos
         # Going through vertical/horizontal lines.
@@ -702,7 +702,7 @@ class King(Piece):
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         y, x = self.current_pos
         # Going through diagonals.
@@ -740,7 +740,7 @@ class King(Piece):
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         danger = [self.diagonal_check(board), self.vertical_horizontal_check(board), self.knight_check(board)]
         # (b means bool, as every element of danger is a boolean value)
@@ -756,7 +756,7 @@ class King(Piece):
         Parameters
         ----------
         board: list
-            chess board.
+            Chess board.
         """
         team = []
         for i in range(8):
