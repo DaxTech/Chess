@@ -111,6 +111,7 @@ class Game:
         font = pygame.font.SysFont('comicsans', 80)
         text = font.render('STALEMATE', 1, BLACK)
         self.screen.blit(text, (160, 260))
+        pygame.display.flip()
 
     def checkmate(self, turn: bool):
         """
