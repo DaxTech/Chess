@@ -1,10 +1,7 @@
 # Chess
-This is the Chess repo. Currently in development. Its aim is to create a chess board where the user can play against a friend or an AI.<br>
+Chess using pygame. Run the file and play against a friend or AI.<br>
+The AI uses the alpha-beta pruning algorithm to make the moves, with an evaluation function that considers material balance, doubled and blocked pawns, and relative position of the pieces.
 
-## TODO
-- Represent the chess board<br>
-- Represent the rules of the game<br>
-- Make the pieces, with their respective movements<br>
-- Special movements and exceptions<br>
-- Check and checkmate<br>
-- Look for algorithms used in chess
+## Usage
+Click on the executable `PythonChess.exe` and play!
+From the command-line: `python DEMO.py` or just `DEMO.py`.
