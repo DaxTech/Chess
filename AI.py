@@ -308,7 +308,6 @@ def go_back(board: list, piece: Piece, cur_pos: tuple, action: tuple, bucket=Non
             board[cur_y][cur_x] = 0 if (cur_y + cur_x) % 2 == 0 else -1
         piece.current_pos = action
 
-
 def alpha_beta(board: list, depth: int, turn: bool, alpha: tuple, beta: tuple):
     """
     Alpha-Beta pruning algorithm, returns best move after search.
@@ -326,11 +325,9 @@ def alpha_beta(board: list, depth: int, turn: bool, alpha: tuple, beta: tuple):
     """
     if depth == 0 or terminal_state(board, turn):
         return None, None, evaluate(board, turn)
-    cut_off = False
     if turn:
         best_res = None, None, float('inf')
         for piece in get_pieces(board, color='white'):
-            if cut_off: break
             for move in piece.available_moves(board):
                 pos = piece.current_pos
                 bucket = transition(board, piece, pos, move)
@@ -341,14 +338,11 @@ def alpha_beta(board: list, depth: int, turn: bool, alpha: tuple, beta: tuple):
                 if best_res[2] <= beta[2]:
                     beta = best_res
                 if beta[2] <= alpha[2]:
-                    cut_off = True
                     break
         return best_res
     else:
         best_res = None, None, float('-inf')
         for piece in get_pieces(board):
-            if cut_off:
-                break
             for move in piece.available_moves(board):
                 pos = piece.current_pos
                 bucket = transition(board, piece, pos, move)
@@ -359,6 +353,5 @@ def alpha_beta(board: list, depth: int, turn: bool, alpha: tuple, beta: tuple):
                 if best_res[2] >= alpha[2]:
                     alpha = best_res
                 if beta[2] <= alpha[2]:
-                    cut_off = True
                     break
-        return best_res
+        return best_res        
